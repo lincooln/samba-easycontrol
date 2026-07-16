@@ -1,0 +1,13 @@
+{
+  "version": 0,
+  "tools": {
+    "samba-easycontrol": {
+      "label": "Samba",
+      "path": "index.html",
+      "icon": "network-server-symbolic"
+    }
+  },
+  "required": {
+    "superuser": "require"
+  }
+}

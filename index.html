@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Samba</title>
+    
+    <script src="../base1/cockpit.js"></script>
+    <link href="../base1/cockpit.css" rel="stylesheet">
+    
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js" defer></script>
+</head>
+<body>
+
+    <h2>Управление Samba</h2>
+
+    <!-- Навигация -->
+    <div class="tabs">
+        <button id="btn-mount" class="tab-btn active">Подключения (Клиент)</button>
+        <button id="btn-share" class="tab-btn">Раздача (Сервер)</button>
+        <button id="btn-about" class="tab-btn">О плагине</button>
+    </div>
+
+    <!-- Вкладка 1: Клиент -->
+    <div id="mount-tab" class="tab-content active">
+        <div class="grid">
+            <div class="card">
+                <h3>Подключить сетевой диск</h3>
+                <form id="mount-form" class="form-mount-layout">
+                    <div class="form-group">
+                        <label>Сетевой путь (Samba Share):</label>
+                        <div class="input-scan-group">
+                            <input type="text" id="mount-smb-path" class="form-control" placeholder="//192.168.1.100/share" required>
+                            <button type="button" id="btn-scan" class="btn-scan-action">
+                                Найти в сети
+                            </button>
+                        </div>
+                        <div id="scan-results" class="scan-results-box">
+                            <small class="text-muted scan-title-margin">Доступные устройства (кликните для выбора):</small>
+                            <div id="scan-hosts-list" class="scan-hosts-flex"></div>
+                            <!-- Блок для вывода общих папок выбранного устройства -->
+                            <div id="share-results" class="scan-results-box" style="margin-top: 15px; border-style: dotted; display: none;">
+                            <small class="text-muted scan-title-margin">Доступные папки на устройстве (кликните для выбора):</small>
+                            <div id="scan-shares-list" class="scan-hosts-flex"></div>
+                        </div>
+
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Точка монтирования (Папка на сервере):</label>
+                        <input type="text" id="mount-local-path" class="form-control" placeholder="/home/user/smbmount" required>
+                    </div>
+                    <div class="form-grid-inputs form-group">
+                        <div>
+                            <label>Пользователь:</label>
+                            <input type="text" id="mount-user" class="form-control" placeholder="guest">
+                        </div>
+                        <div>
+                            <label>Пароль:</label>
+                            <input type="password" id="mount-pass" class="form-control" placeholder="••••••••">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Подключить диск</button>
+                </form>
+            </div>
+            <div id="mount-list-card" class="card">
+                <h3>Активные подключения</h3>
+                <p class="text-muted">Нет active сетевых подключений.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Вкладка 2: Сервер -->
+    <div id="share-tab" class="tab-content">
+        <div class="grid">
+            <div class="card">
+                <h3>Поделиться папкой</h3>
+                <form id="share-form" class="form-mount-layout">
+                    <div class="form-group">
+                        <label>Имя сетевой шары:</label>
+                        <input type="text" id="share-name" class="form-control" placeholder="my_shared_folder" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Путь к локальной папке:</label>
+                        <input type="text" id="share-path" class="form-control" placeholder="/media/storage/downloads" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Доступ:</label>
+                        <select id="share-access" class="form-control">
+                            <option value="guest">Доступно всем (Гостевой вход)</option>
+                            <option value="private">Только авторизованные пользователи</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn-primary">Открыть общий доступ</button>
+                </form>
+            </div>
+            <div class="card">
+                <h3>Общие папки (Пассивные шары)</h3>
+                <p class="text-muted">Сервер пока ничего не раздает в сеть.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Вкладка 3: О плагине -->
+    <div id="about-tab" class="tab-content">
+        <div class="card card-about-layout">
+            <h3>О программе</h3>
+            <p>Утилита для максимально простого монтирования и расшаривания сетевых ресурсов Samba в домашних и тестовых средах.</p>
+            
+            <h4>💡 Полезные заметки</h4>
+            <ul class="list-padding">
+                <li>Диски монтируются в домашнюю директорию текущего пользователя.</li>
+                <li>Сетевому сканеру может потребоваться до 10 секунд для обнаружения новых устройств в сети.</li>
+            </ul>
+
+            <h4 class="text-danger margin-danger-title">⚠️ Деинсталляция проекта</h4>
+            <p>Если вам больше не нужен этот плагин, вы можете полностью удалить его из системы. Для этого откройте вкладку <b>Терминал</b> в левом меню Cockpit и выполните команду:</p>
+            <code>sudo /usr/share/cockpit/samba-easycontrol/uninstall.sh</code>
+            <p><small>Сценарий корректно размонтирует все сетевые папки, очистит конфигурационные файлы Samba и удалит веб-интерфейс.</small></p>
+        </div>
+    </div>
+
+</body>
+</html>
