@@ -14,6 +14,12 @@
 <body>
 
     <h2>Управление Samba</h2>
+        <!-- Блок-заглушка для режима ограниченного доступа -->
+    <div id="admin-warning-block" class="card" style="border: 1px solid var(--cockpit-color-text-danger, #ff6b6b) !important;">
+        <h3 style="color: var(--cockpit-color-text-danger, #ff6b6b) !important;">🔒 Требуются права администратора</h3>
+        <p style="margin-top: 15px;">Этот плагин выполняет системные операции монтирования дисков и изменения конфигурации Samba.</p>
+        <p>Для продолжения работы, пожалуйста, нажмите кнопку <b>«Включить административный доступ»</b> (синяя плашка с замком в верхнем меню Cockpit) и введите свой пароль.</p>
+    </div>
 
     <!-- Навигация -->
     <div class="tabs">
@@ -43,8 +49,7 @@
                             <div id="share-results" class="scan-results-box" style="margin-top: 15px; border-style: dotted; display: none;">
                             <small class="text-muted scan-title-margin">Доступные папки на устройстве (кликните для выбора):</small>
                             <div id="scan-shares-list" class="scan-hosts-flex"></div>
-                        </div>
-
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -69,6 +74,10 @@
                 <p class="text-muted">Нет active сетевых подключений.</p>
             </div>
         </div>
+            <!-- Блок предупреждения о коллизии путей (скрыт по умолчанию) -->
+            <small id="mount-path-warning" class="text-danger" style="display: none; margin-top: 5px; font-weight: 600;">
+            ⚠️ Внимание: Этот путь уже занят другим активным подключением! Измените имя папки, чтобы избежать конфликта.
+            </small>
     </div>
 
     <!-- Вкладка 2: Сервер -->

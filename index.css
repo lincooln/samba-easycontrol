@@ -1,16 +1,168 @@
-body {
+/* По умолчанию скрываем сообщение о нехватке прав */
+#admin-warning-block {
+    display: none !important;
+}
+
+/* Если Cockpit зафиксировал ограниченный доступ, мы прячем весь интерфейс плагина 
+   и красиво показываем пользователю только текстовую карточку-предупреждение */
+.cockpit-restricted body * {
+    display: none !important;
+}
+
+.cockpit-restricted #admin-warning-block {
+    display: block !important;
+    max-width: 500px;
+    margin: 50px auto;
+}
+
+
+
+/* ТОТАЛЬНЫЙ ХАРДКОД ТЕМНОЙ ТЕМЫ — ИГНОРИРУЕМ ПЕСОЧНИЦУ COCKPIT */
+
+html, body {
+    background-color: #151515 !important; /* Глубокий темный фон всей страницы */
+    color: #f0f0f0 !important;            /* Чистый белый текст */
     padding: 20px;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     margin: 0;
 }
 
+/* Принудительно красим все текстовые элементы в белый/светло-серый */
+h2 {
+    color: #ffffff !important;
+    margin-top: 0;
+    margin-bottom: 20px;
+}
+
+h3 {
+    color: #ffffff !important;
+    margin-top: 0;
+    border-bottom: 1px solid #444444 !important; /* Темная линия под заголовком карточки */
+    padding-bottom: 10px;
+}
+
+label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #e0e0e0 !important; /* Светло-серые подписи к полям */
+}
+
+p, small, span {
+    color: #b8bbbe !important; /* Серый текст для второстепенных записей */
+}
+
+/* Сетка карточек */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+/* Карточки — принудительно графитово-темные */
+.card {
+    background: #212121 !important; /* Графитовый фон карточки */
+    border: 1px solid #3c3f41 !important; /* Аккуратная темная рамка */
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.3) !important;
+}
+
+/* Поля ввода и выпадающие списки — убираем белые пятна раз и навсегда */
+.form-group { 
+    margin-bottom: 15px; 
+}
+
+.form-control {
+    width: 100%; 
+    padding: 8px; 
+    border: 1px solid #444444 !important; 
+    border-radius: 4px; 
+    background-color: #1c1c1c !important; /* Очень темный фон внутри инпута */
+    color: #ffffff !important;           /* Яркий белый текст при вводе */
+    box-sizing: border-box;
+}
+
+/* Фикс для стрелочек и опций в селекте */
+select.form-control {
+    background-color: #1c1c1c !important;
+    color: #ffffff !important;
+}
+select.form-control option {
+    background-color: #212121 !important;
+    color: #ffffff !important;
+}
+
+/* Возвращаем кнопку "Найти в сети" в один ряд с полем ввода */
+.input-scan-group {
+    display: flex !important;
+    gap: 10px !important;
+    align-items: stretch !important; /* Растягивает кнопку по высоте поля ввода */
+    width: 100%;
+}
+
+/* Яркая синяя кнопка — отлично контрастирует на темном */
+.btn-primary {
+    background: #0066cc !important; 
+    color: #ffffff !important; 
+    border: none; 
+    padding: 10px 15px; 
+    border-radius: 4px; 
+    font-weight: 600; 
+    cursor: pointer; 
+    width: 100%; 
+    transition: background 0.2s;
+}
+.btn-primary:hover { 
+    background: #0056b3 !important; 
+}
+
+/* Элементы сканера сети и папок */
+.scan-results-box {
+    display: none;
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px dashed #444444 !important;
+    border-radius: 4px;
+    background: #1c1c1c !important; /* Темный фон подложки результатов */
+}
+
+.badge-share-item {
+    background: #212121 !important;
+    border: 1px solid #0066cc !important;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: #ffffff !important;
+    display: inline-block;
+    transition: all 0.2s;
+}
+.badge-share-item:hover {
+    background: #0066cc !important;
+}
+
 /* Навигация (Вкладки) */
 .tabs {
     display: flex;
-    border-bottom: 2px solid var(--cockpit-color-border, #d2d2d2);
+    border-bottom: 2px solid #3c3f41 !important;
     margin-bottom: 20px;
-    overflow-x: auto;
+    overflow-x: auto;            /* Оставляем горизонтальный скролл для мобилок */
+    overflow-y: hidden;          /* ЖЕСТКО БЛОКИРУЕМ вертикальный ползунок */
     white-space: nowrap;
+    -webkit-overflow-scrolling: touch; /* Плавный скролл на iOS */
+}
+
+/* Скрываем сам графический скроллбар в контейнере вкладок для всех браузеров */
+.tabs::-webkit-scrollbar {
+    display: none !important;    /* Для Chrome, Safari и Opera */
+    width: 0 !important;
+    height: 0 !important;
+}
+.tabs {
+    -ms-overflow-style: none;    /* Для Internet Explorer и старого Edge */
+    scrollbar-width: none;       /* Для Firefox */
 }
 
 .tab-btn {
@@ -20,150 +172,32 @@ body {
     cursor: pointer;
     font-size: 16px;
     font-weight: 600;
-    color: var(--cockpit-color-text-secondary, #6a6e73);
+    color: #8a8d90 !important; /* Серые неактивные вкладки */
     border-bottom: 3px solid transparent;
     margin-bottom: -2px;
     transition: all 0.2s ease;
 }
 
 .tab-btn:hover { 
-    color: var(--cockpit-color-text-link, #0066cc); 
+    color: #0066cc !important; 
 }
 
 .tab-btn.active {
-    color: var(--cockpit-color-text-link, #0066cc);
-    border-bottom-color: var(--cockpit-color-text-link, #0066cc);
+    color: #0066cc !important; /* Синяя активная вкладка */
+    border-bottom-color: #0066cc !important;
 }
 
-/* Управление видимостью вкладок */
 .tab-content { display: none; }
 .tab-content.active { display: block; }
 
-/* Сетка карточек */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-}
-
-.card {
-    background: var(--cockpit-color-bg-surface, #ffffff);
-    border: 1px solid var(--cockpit-color-border, #d2d2d2);
-    border-radius: 4px;
-    padding: 20px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-}
-
-.card h3 {
-    margin-top: 0;
-    border-bottom: 1px solid var(--cockpit-color-border, #d2d2d2);
-    padding-bottom: 10px;
-}
-
-/* Поля ввода */
-.form-group { margin-bottom: 15px; }
-.form-group label { display: block; font-weight: 600; margin-bottom: 5px; }
-.form-control {
-    width: 100%; padding: 8px; 
-    border: 1px solid var(--cockpit-color-border, #d2d2d2); border-radius: 4px; 
-    background: var(--cockpit-color-bg-canvas, #f0f2f5); color: var(--cockpit-color-text, #151515); 
-    box-sizing: border-box;
-}
-
-/* Кнопки */
-.btn-primary {
-    background: var(--cockpit-color-text-link, #0066cc); color: #fff; border: none; 
-    padding: 10px 15px; border-radius: 4px; font-weight: 600; 
-    cursor: pointer; width: 100%; transition: opacity 0.2s;
-}
-.btn-primary:hover { opacity: 0.9; }
-
-code {
-    display: block; background: var(--cockpit-color-bg-code, #151515); color: var(--cockpit-color-text-code, #f0f0f0);
-    border: 1px solid var(--cockpit-color-border, #d2d2d2); padding: 12px;
-    border-radius: 4px; font-family: monospace; font-size: 14px;
-    margin: 15px 0; overflow-x: auto;
-}
-
-.text-muted { color: var(--cockpit-color-text-secondary, #6a6e73); }
-.text-danger { color: var(--cockpit-color-text-danger, #c9190b); }
-
-ul { padding-left: 20px; line-height: 1.6; }
-@media (max-width: 480px) { body { padding: 10px; } .card { padding: 15px; } }
-
-/* Новые классы для строгого соблюдения Content Security Policy */
-.form-mount-layout {
-    margin-top: 15px;
-}
-
-.input-scan-group {
-    display: flex;
-    gap: 10px;
-}
-
-.btn-scan-action {
-    background: var(--cockpit-color-bg-surface, #ffffff);
-    color: var(--cockpit-color-text-link, #0066cc);
-    border: 1px solid var(--cockpit-color-text-link, #0066cc);
-    padding: 0 15px;
-    border-radius: 4px;
-    font-weight: 600;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-.scan-results-box {
-    display: none;
-    margin-top: 10px;
-    padding: 10px;
-    border: 1px dashed var(--cockpit-color-border, #d2d2d2);
-    border-radius: 4px;
-    background: var(--cockpit-color-bg-surface, #ffffff);
-}
-
-.scan-title-margin {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.scan-hosts-flex {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-}
-
-.form-grid-inputs {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.card-about-layout {
-    max-width: 800px;
-    margin: 0 auto;
-}
-
-.list-padding {
-    padding-left: 20px;
-    line-height: 1.6;
-}
-
-.margin-danger-title {
-    margin-top: 30px;
-}
-
-.mount-list-item {
-    margin-bottom: 10px;
-}
-
-/* Стили для элементов списка активных подключений */
+/* Строки активных подключений */
 .mount-item-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--cockpit-color-border, #d2d2d2);
+    border-bottom: 1px solid #3c3f41 !important;
 }
 
 .mount-item-info {
@@ -173,8 +207,8 @@ ul { padding-left: 20px; line-height: 1.6; }
 
 .btn-umount {
     background: transparent;
-    color: var(--cockpit-color-text-danger, #c9190b);
-    border: 1px solid var(--cockpit-color-text-danger, #c9190b);
+    color: #ff6b6b !important; /* Красный текст кнопки */
+    border: 1px solid #ff6b6b !important;
     padding: 4px 8px;
     border-radius: 4px;
     font-size: 12px;
@@ -185,19 +219,38 @@ ul { padding-left: 20px; line-height: 1.6; }
 }
 
 .btn-umount:hover {
-    background: var(--cockpit-color-text-danger, #c9190b);
-    color: #fff;
+    background: #ff6b6b !important;
+    color: #ffffff !important;
 }
 
-.badge-share-item {
-    background: var(--cockpit-color-bg-surface, #ffffff);
-    border: 1px solid var(--cockpit-color-text-link, #0066cc);
-    padding: 6px 12px;
+/* Кнопка "Найти в сети" — ИСПРАВЛЕНО: запрещен перенос текста и добавлена ширина */
+.btn-scan-action {
+    background: var(--cockpit-color-bg-surface, #ffffff) !important;
+    color: var(--cockpit-color-text-link, #0066cc) !important;
+    border: 1px solid var(--cockpit-color-text-link, #0066cc) !important;
+    padding: 0 20px !important;
     border-radius: 4px;
-    cursor: pointer;
-    font-size: 13px;
     font-weight: 600;
-    color: var(--cockpit-color-text, #151515);
-    display: inline-block;
-    transition: all 0.2s;
+    cursor: pointer;
+    white-space: nowrap !important; /* Намертво запрещаем перенос текста */
+    min-width: 130px !important;    /* Гарантируем, что кнопка будет достаточно широкой */
 }
+
+/* Терминальный блок во вкладке "О программе" */
+code {
+    display: block; 
+    background: #000000 !important; 
+    color: #39ff14 !important; /* Неоново-зеленый шрифт */
+    border: 1px solid #444444 !important; 
+    padding: 12px;
+    border-radius: 4px; 
+    font-family: monospace; 
+    font-size: 14px;
+    margin: 15px 0; 
+    overflow-x: auto;
+}
+
+.text-muted { color: #8a8d90 !important; }
+.text-danger { color: #ff6b6b !important; }
+ul { padding-left: 20px; line-height: 1.6; }
+@media (max-width: 480px) { body { padding: 10px; } .card { padding: 15px; } }

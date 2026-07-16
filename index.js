@@ -314,7 +314,7 @@ function scanNetwork() {
         });
 }
 
-// Функция опроса доступных шар на конкретном удаленном IP
+// Функция опроса доступных шар на конкретном удаленном IP (ИСПРАВЛЕНО ДЛЯ ЧИСТЫХ СИСТЕМ)
 function fetchDeviceShares(ip) {
     const shareResultsBlock = document.getElementById('share-results');
     const sharesList = document.getElementById('scan-shares-list');
@@ -331,9 +331,8 @@ function fetchDeviceShares(ip) {
     loading.textContent = 'Опрашиваю устройство...';
     sharesList.appendChild(loading);
 
-    // Вызываем системный smbclient для вывода списка ресурсов (-L) анонимно (-N)
-    // Устанавливаем таймаут, чтобы интерфейс не зависал, если узел недоступен
-    cockpit.spawn(["smbclient", "-L", "//" + ip, "-N", "-g"])
+    // ИСПРАВЛЕНО: Добавлен аргумент "-U", "%" для исключения интерактивных запросов пароля в Debian
+    cockpit.spawn(["smbclient", "-L", "//" + ip, "-N", "-U", "%", "-g"])
         .done(function(output) {
             while (sharesList.firstChild) {
                 sharesList.removeChild(sharesList.firstChild);
@@ -343,12 +342,10 @@ function fetchDeviceShares(ip) {
             let foundSharesCount = 0;
 
             lines.forEach(function(line) {
-                // smbclient с флагом -g возвращает строки вида: "Disk|user|Description"
                 const parts = line.split('|');
                 if (parts[0] === 'Disk') {
                     const shareName = parts[1].trim();
 
-                    // ФИЛЬТРАЦИЯ: Игнорируем служебные шары Windows, содержащие знак $
                     if (shareName.indexOf('$') === -1) {
                         foundSharesCount++;
 
@@ -356,16 +353,25 @@ function fetchDeviceShares(ip) {
                         shareBadge.classList.add('badge-share-item');
                         shareBadge.textContent = `📁 ${shareName}`;
 
-                        // Эффект наведения
                         shareBadge.addEventListener('mouseenter', function() { shareBadge.style.background = 'var(--cockpit-color-bg-canvas)'; });
                         shareBadge.addEventListener('mouseleave', function() { shareBadge.style.background = 'var(--cockpit-color-bg-surface)'; });
 
-                        // При клике на папку подставляем её имя в итоговый сетевой путь формы
+                        // ИСПРАВЛЕННЫЙ БЛОК ДЛЯ ВАШЕГО СТАРОГО INDEX.JS
                         shareBadge.addEventListener('click', function() {
-                            document.getElementById('mount-smb-path').value = `//${ip}/${shareName}`;
-                            // Автоматически предлагаем красивую дефолтную точку монтирования на сервере
-                            document.getElementById('mount-local-path').value = `/mnt/${shareName}`;
+                        document.getElementById('mount-smb-path').value = '//' + ip + '/' + shareName;
+    
+                        // Прямое и надежное получение имени пользователя текущей сессии Cockpit
+                        let username = (window.cockpit && window.cockpit.user) ? cockpit.user.name : "";
+    
+                            if (username && username !== "root") {
+                            document.getElementById('mount-local-path').value = '/home/' + username + '/' + shareName;
+                            } else {
+                            document.getElementById('mount-local-path').value = '/mnt/' + shareName;
+                            }
+                            // КРИТИЧЕСКИ ВАЖНО: Запускаем проверку сразу после того, как JS подставил путь автоматикой
+                            checkMountCollision();
                         });
+
 
                         sharesList.appendChild(shareBadge);
                     }
@@ -375,7 +381,7 @@ function fetchDeviceShares(ip) {
             if (foundSharesCount === 0) {
                 const noShares = document.createElement('span');
                 noShares.classList.add('text-muted');
-                noShares.textContent = 'Доступные без пароля общие папки не найдены. Возможно, требуется авторизация.';
+                noShares.textContent = 'Доступные без пароля общие папки не найдены.';
                 sharesList.appendChild(noShares);
             }
         })
@@ -385,10 +391,49 @@ function fetchDeviceShares(ip) {
             }
             const errorSpan = document.createElement('span');
             errorSpan.classList.add('text-muted');
-            errorSpan.textContent = 'Не удалось получить список папок (требуется пароль или доступ заблокирован).';
+            errorSpan.textContent = 'Не удалось получить список папок (требуется пароль).';
             sharesList.appendChild(errorSpan);
         });
 }
+
+
+// Функция проверки коллизии путей (ИСПРАВЛЕННАЯ СИНТАКСИЧЕСКАЯ ОШИБКА)
+function checkMountCollision() {
+    const localPathInput = document.getElementById('mount-local-path');
+    const warningBlock = document.getElementById('mount-path-warning');
+    const listCard = document.getElementById('mount-list-card');
+    
+    if (!localPathInput || !warningBlock) return;
+    
+    const currentPath = localPathInput.value.trim();
+    
+    // Если поле пустое — гарантированно скрываем надпись и выходим
+    if (currentPath === "") {
+        warningBlock.style.display = "none";
+        return;
+    }
+
+    // Собираем пути из списка активных подключений
+    const activeTargets = [];
+    if (listCard) {
+        const boldElements = listCard.querySelectorAll('b');
+        boldElements.forEach(function(b) {
+            const pathText = b.textContent.trim();
+            if (pathText && pathText !== "Активные подключения") {
+                activeTargets.push(pathText);
+            }
+        });
+    }
+
+    // Проверяем, есть ли введённый путь в списке уже смонтированных
+    if (activeTargets.indexOf(currentPath) !== -1) {
+        warningBlock.style.display = "block";
+    } else {
+        warningBlock.style.display = "none";
+    }
+}
+
+
 
 
 // 4. Инициализация при загрузке DOM
@@ -397,6 +442,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btn-mount').addEventListener('click', function() { switchTab('mount-tab', this); });
     document.getElementById('btn-share').addEventListener('click', function() { switchTab('share-tab', this); });
     document.getElementById('btn-about').addEventListener('click', function() { switchTab('about-tab', this); });
+
+    // ДОБАВЛЕНО: Отслеживаем ручной ввод пользователя в поле точки монтирования
+    const localPathInput = document.getElementById('mount-local-path');
+    if (localPathInput) {
+        localPathInput.addEventListener('input', checkMountCollision);
+    }
+    // Запускаем проверку один раз при старте, чтобы гарантированно скрыть блок
+    checkMountCollision();
 
     // Кнопка сканирования
     const btnScan = document.getElementById('btn-scan');
